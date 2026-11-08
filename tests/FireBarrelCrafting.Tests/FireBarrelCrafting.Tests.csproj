@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Unit tests for everything that can run without the game: pure logic and constructor guards.
+    Behaviour that touches live Il2Cpp / Unity objects is verified in-game.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <CopyGameReferences>true</CopyGameReferences>
+  </PropertyGroup>
+
+  <Import Project="..\..\build\GameReferences.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FireBarrelCrafting\FireBarrelCrafting.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="FluentAssertions" />
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Pinned: FluentAssertions 8+ needs a paid licence for commercial use; 7.x is Apache-2.0. -->
+    <PackageReference Include="FluentAssertions" Version="7.2.0" />
+    <PackageReference Include="MSTest" Version="4.5.2" />
+  </ItemGroup>
+
+</Project>

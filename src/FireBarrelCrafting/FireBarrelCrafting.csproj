@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- MelonLoader 0.7 runs mods on .NET 6. -->
+    <TargetFramework>net6.0</TargetFramework>
+    <Version>1.0.0</Version>
+    <DebugType>embedded</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Copy the built DLL into the game's Mods folder after a successful build. -->
+    <CopyToMods Condition="'$(CopyToMods)' == ''">true</CopyToMods>
+  </PropertyGroup>
+
+  <Import Project="..\..\build\GameReferences.props" />
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FireBarrelCrafting.Tests" />
+  </ItemGroup>
+
+  <Target Name="CopyToGameMods" AfterTargets="Build" Condition="'$(CopyToMods)' == 'true' And Exists('$(TLDDir)\Mods')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TLDDir)\Mods" />
+    <Message Importance="high" Text="$(AssemblyName) -> $(TLDDir)\Mods\$(TargetFileName)" />
+  </Target>
+
+</Project>

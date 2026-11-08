@@ -1,0 +1,12 @@
+<Project>
+  <!-- Settings shared by every project in the solution. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Il2Cpp interop assemblies are AMD64 and pull mismatching framework versions; both are expected. -->
+    <NoWarn>$(NoWarn);MSB3270;MSB3277</NoWarn>
+    <Authors>VolodymyrLobachov</Authors>
+  </PropertyGroup>
+</Project>

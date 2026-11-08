@@ -1,0 +1,21 @@
+<Project>
+  <!--
+    Compile-time references to MelonLoader and the game's Il2Cpp interop assemblies.
+    Shared by the mod (never copies them: the game provides them) and the tests (copy them, so test
+    code can load mod types whose fields use game types).
+  -->
+  <PropertyGroup>
+    <!-- Override on the command line: dotnet build -p:TLDDir="E:\Games\TheLongDark" -->
+    <TLDDir Condition="'$(TLDDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\TheLongDark</TLDDir>
+    <MLDir>$(TLDDir)\MelonLoader\net6</MLDir>
+    <Il2CppDir>$(TLDDir)\MelonLoader\Il2CppAssemblies</Il2CppDir>
+    <CopyGameReferences Condition="'$(CopyGameReferences)' == ''">false</CopyGameReferences>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <GameReference Include="MelonLoader;0Harmony;Il2CppInterop.Runtime;Il2CppInterop.Common" Dir="$(MLDir)" />
+    <GameReference Include="Assembly-CSharp;Il2Cppmscorlib;Il2CppSystem;Il2CppTLD.PDID;Il2CppAK.Wwise.Unity.API.WwiseTypes;Il2CppTLD.Addressables;Unity.Addressables;Unity.ResourceManager;UnityEngine;UnityEngine.CoreModule;UnityEngine.PhysicsModule"
+                   Dir="$(Il2CppDir)" />
+    <Reference Include="@(GameReference)" HintPath="%(Dir)\%(Identity).dll" Private="$(CopyGameReferences)" />
+  </ItemGroup>
+</Project>
