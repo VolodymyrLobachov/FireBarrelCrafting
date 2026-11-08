@@ -8,9 +8,9 @@ namespace FireBarrelCrafting.Conversion;
 /// <param name="settings">Supplies the allowed tools and the wear amount.</param>
 /// <param name="log">Mod logger.</param>
 /// <exception cref="ArgumentNullException">A parameter is <see langword="null"/>.</exception>
-internal sealed class CraftingTools(ModSettings settings, ModLog log)
+internal sealed class CraftingTools(FireBarrelSettings settings, ModLog log)
 {
-    private readonly ModSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+    private readonly FireBarrelSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
     private readonly ModLog _log = log ?? throw new ArgumentNullException(nameof(log));
 
     /// <summary>Gets a readable list of acceptable tools, e.g. "Hacksaw, Hatchet or Improvised Hatchet".</summary>

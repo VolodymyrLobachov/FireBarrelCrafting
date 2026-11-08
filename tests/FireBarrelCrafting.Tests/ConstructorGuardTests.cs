@@ -11,7 +11,7 @@ namespace FireBarrelCrafting.Tests;
 [TestClass]
 public sealed class ConstructorGuardTests
 {
-    private static readonly ModSettings Settings = Placeholder.Of<ModSettings>();
+    private static readonly FireBarrelSettings Settings = Placeholder.Of<FireBarrelSettings>();
     private static readonly ModLog Log = Placeholder.Of<ModLog>();
     private static readonly BarrelDetector Detector = Placeholder.Of<BarrelDetector>();
     private static readonly CraftingTools Tools = Placeholder.Of<CraftingTools>();
@@ -23,7 +23,6 @@ public sealed class ConstructorGuardTests
     [
         Case("logger", () => new ModLog(null!, () => false)),
         Case("isVerbose", () => new ModLog(Placeholder.Of<MelonLogger.Instance>(), null!)),
-        Case("settings", () => new BarrelDetector(null!)),
         Case("settings", () => new CraftingTools(null!, Log)),
         Case("log", () => new CraftingTools(Settings, null!)),
         Case("log", () => new FireBarrelRegistry(null!)),
@@ -56,7 +55,7 @@ public sealed class ConstructorGuardTests
         // Act
         Action act = () =>
         {
-            _ = new BarrelDetector(Settings);
+            _ = new BarrelDetector();
             _ = new CraftingTools(Settings, Log);
             _ = new FireBarrelRegistry(Log);
             _ = new FireBarrelFactory(Registry, Log);

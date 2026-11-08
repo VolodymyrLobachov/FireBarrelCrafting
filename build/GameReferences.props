@@ -16,6 +16,8 @@
     <GameReference Include="MelonLoader;0Harmony;Il2CppInterop.Runtime;Il2CppInterop.Common" Dir="$(MLDir)" />
     <GameReference Include="Assembly-CSharp;Il2Cppmscorlib;Il2CppSystem;Il2CppTLD.PDID;Il2CppAK.Wwise.Unity.API.WwiseTypes;Il2CppTLD.Addressables;Unity.Addressables;Unity.ResourceManager;UnityEngine;UnityEngine.CoreModule;UnityEngine.PhysicsModule"
                    Dir="$(Il2CppDir)" />
+    <!-- Mod dependencies: installed by the player next to this mod. -->
+    <GameReference Include="ModSettings" Dir="$(TLDDir)\Mods" />
     <Reference Include="@(GameReference)" HintPath="%(Dir)\%(Identity).dll" Private="$(CopyGameReferences)" />
   </ItemGroup>
 </Project>

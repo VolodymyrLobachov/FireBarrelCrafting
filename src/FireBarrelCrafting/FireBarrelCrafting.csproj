@@ -3,7 +3,8 @@
   <PropertyGroup>
     <!-- MelonLoader 0.7 runs mods on .NET 6. -->
     <TargetFramework>net6.0</TargetFramework>
-    <Version>1.0.0</Version>
+    <!-- The only place to change the version: BuildInfo (shown by MelonLoader) is generated from it. -->
+    <Version>1.1.0</Version>
     <DebugType>embedded</DebugType>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateDependencyFile>false</GenerateDependencyFile>
@@ -18,9 +19,33 @@
     <InternalsVisibleTo Include="FireBarrelCrafting.Tests" />
   </ItemGroup>
 
+  <!--
+    MelonInfo needs compile-time constants, so BuildInfo is generated from the project properties
+    instead of being typed by hand (single source of truth for name, version and author).
+  -->
+  <Target Name="GenerateBuildInfo" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <BuildInfoFile>$(IntermediateOutputPath)BuildInfo.g.cs</BuildInfoFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <BuildInfoLine Include="// &lt;auto-generated/&gt; by the GenerateBuildInfo target in $(MSBuildProjectFile)." />
+      <BuildInfoLine Include="namespace $(RootNamespace)%3B" />
+      <BuildInfoLine Include="internal static class BuildInfo {" />
+      <BuildInfoLine Include="public const string Name = &quot;$(AssemblyName)&quot;%3B" />
+      <BuildInfoLine Include="public const string Version = &quot;$(Version)&quot;%3B" />
+      <BuildInfoLine Include="public const string Author = &quot;$(Authors)&quot;%3B" />
+      <BuildInfoLine Include="}" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(BuildInfoFile)" Lines="@(BuildInfoLine)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(BuildInfoFile)" />
+      <FileWrites Include="$(BuildInfoFile)" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="CopyToGameMods" AfterTargets="Build" Condition="'$(CopyToMods)' == 'true' And Exists('$(TLDDir)\Mods')">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TLDDir)\Mods" />
-    <Message Importance="high" Text="$(AssemblyName) -> $(TLDDir)\Mods\$(TargetFileName)" />
+    <Message Importance="high" Text="$(AssemblyName) $(Version) -> $(TLDDir)\Mods\$(TargetFileName)" />
   </Target>
 
 </Project>

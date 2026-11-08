@@ -12,12 +12,6 @@ internal static class ModText
     /// <summary>Game sprite for the craft entry.</summary>
     public const string WheelIcon = "ico_crafting";
 
-    /// <summary>Game loc id of the vanilla "Destroy" label.</summary>
-    public const string DestroyLocId = "GAMEPLAY_Destroy";
-
-    /// <summary>Game sprite for the destroy entry.</summary>
-    public const string DestroyIcon = "ico_dismantle";
-
     /// <summary>Progress bar caption.</summary>
     public const string Progress = "Crafting fire barrel...";
 

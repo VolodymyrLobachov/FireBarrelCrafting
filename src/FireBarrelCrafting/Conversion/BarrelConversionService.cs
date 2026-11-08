@@ -19,7 +19,7 @@ namespace FireBarrelCrafting.Conversion;
 /// <param name="log">Mod logger.</param>
 /// <exception cref="ArgumentNullException">A parameter is <see langword="null"/>.</exception>
 internal sealed class BarrelConversionService(
-    ModSettings settings,
+    FireBarrelSettings settings,
     BarrelDetector detector,
     CraftingTools tools,
     FireBarrelFactory factory,
@@ -27,7 +27,7 @@ internal sealed class BarrelConversionService(
 {
     private const float ProgressBarSeconds = 5f;
 
-    private readonly ModSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+    private readonly FireBarrelSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
     private readonly BarrelDetector _detector = detector ?? throw new ArgumentNullException(nameof(detector));
     private readonly CraftingTools _tools = tools ?? throw new ArgumentNullException(nameof(tools));
     private readonly FireBarrelFactory _factory = factory ?? throw new ArgumentNullException(nameof(factory));

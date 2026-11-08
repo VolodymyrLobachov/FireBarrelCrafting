@@ -2,16 +2,19 @@ using FireBarrelCrafting.Conversion;
 using FireBarrelCrafting.Infrastructure;
 using Il2Cpp;
 using Il2CppInterop.Runtime;
-using Il2CppGeneric = Il2CppSystem.Collections.Generic;
 
 namespace FireBarrelCrafting.Interaction;
 
 /// <summary>
-/// Replaces the single vanilla "Destroy" interaction of a decorative barrel with the game's action wheel:
-/// "Destroy" (runs the untouched vanilla interaction) and "Fire Barrel" (starts the conversion).
+/// Adds a "Fire Barrel" entry to the interaction wheel of convertible barrels.
 /// </summary>
-/// <param name="detector">Decides which decorations get the wheel.</param>
-/// <param name="conversion">Started by the "Fire Barrel" entry.</param>
+/// <remarks>
+/// The entry is appended to the decoration's own action list (<see cref="DecorationItem.m_ItemData"/>), which the
+/// vanilla interaction turns into the wheel. Vanilla entries and entries from other mods (e.g. Safehouse
+/// Customization Plus adds "Break Down" the same way) therefore stay in one wheel, untouched.
+/// </remarks>
+/// <param name="detector">Decides which decorations get the entry.</param>
+/// <param name="conversion">Started when the entry is selected.</param>
 /// <param name="log">Mod logger.</param>
 /// <exception cref="ArgumentNullException">A parameter is <see langword="null"/>.</exception>
 internal sealed class ConversionWheel(BarrelDetector detector, BarrelConversionService conversion, ModLog log)
@@ -20,41 +23,40 @@ internal sealed class ConversionWheel(BarrelDetector detector, BarrelConversionS
     private readonly BarrelConversionService _conversion = conversion ?? throw new ArgumentNullException(nameof(conversion));
     private readonly ModLog _log = log ?? throw new ArgumentNullException(nameof(log));
 
-    private bool _runningVanillaInteraction;
-
-    /// <summary>Opens the wheel if <paramref name="decoration"/> is a convertible barrel.</summary>
-    /// <param name="decoration">The decoration the player interacted with.</param>
-    /// <returns><see langword="true"/> if the wheel was opened and the vanilla interaction must be skipped.</returns>
-    public bool TryOpen(DecorationItem decoration)
+    /// <summary>Adds the "Fire Barrel" entry if <paramref name="decoration"/> is a convertible barrel and lacks it.</summary>
+    /// <param name="decoration">A decoration whose interaction was just set up.</param>
+    public void AddEntryIfConvertible(DecorationItem decoration)
     {
-        if (_runningVanillaInteraction || !_detector.IsConvertible(decoration))
+        if (!_detector.IsConvertible(decoration))
         {
-            return false;
+            return;
         }
 
-        var items = new Il2CppGeneric.List<ActionPickerItemData>();
-        items.Add(CreateItem(ModText.DestroyIcon, ModText.DestroyLocId, () => RunVanillaInteraction(decoration)));
-        items.Add(CreateItem(ModText.WheelIcon, ModText.WheelLocId, () => _conversion.Begin(decoration)));
+        var items = decoration.m_ItemData;
+        if (items == null || ContainsEntry(items))
+        {
+            return;
+        }
 
-        _log.Debug($"Opening wheel for '{decoration.name}'.");
-        InterfaceManager.GetPanel<Panel_ActionPicker>()
-            .ShowActionPicker(decoration.gameObject, items.Cast<Il2CppGeneric.IEnumerable<ActionPickerItemData>>());
-        return true;
+        Action onSelected = () => _conversion.Begin(decoration);
+        items.Add(new ActionPickerItemData(ModText.WheelIcon, ModText.WheelLocId,
+            DelegateSupport.ConvertDelegate<Il2CppSystem.Action>(onSelected)));
+
+        _log.Debug($"Added Fire Barrel entry to '{decoration.name}' ({items.Count} entries).");
     }
 
-    private void RunVanillaInteraction(DecorationItem decoration)
+    private static bool ContainsEntry(Il2CppSystem.Collections.Generic.List<ActionPickerItemData> items)
     {
-        _runningVanillaInteraction = true;
-        try
+        // Indexed loop on purpose: enumerating Il2Cpp lists from managed code has failed before.
+        for (int i = 0; i < items.Count; i++)
         {
-            decoration.PerformInteraction();
+            ActionPickerItemData item = items[i];
+            if (item != null && item.m_LocID == ModText.WheelLocId)
+            {
+                return true;
+            }
         }
-        finally
-        {
-            _runningVanillaInteraction = false;
-        }
-    }
 
-    private static ActionPickerItemData CreateItem(string icon, string locId, Action onSelected) =>
-        new(icon, locId, DelegateSupport.ConvertDelegate<Il2CppSystem.Action>(onSelected));
+        return false;
+    }
 }
