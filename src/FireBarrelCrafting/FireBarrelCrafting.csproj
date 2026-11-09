@@ -4,7 +4,7 @@
     <!-- MelonLoader 0.7 runs mods on .NET 6. -->
     <TargetFramework>net6.0</TargetFramework>
     <!-- The only place to change the version: BuildInfo (shown by MelonLoader) is generated from it. -->
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <DebugType>embedded</DebugType>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateDependencyFile>false</GenerateDependencyFile>
