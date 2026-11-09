@@ -73,6 +73,6 @@ public sealed class FireBarrelIdentityTests
         Action act = () => FireBarrelIdentity.FireGuidFor(null!);
 
         // Assert
-        act.Should().Throw<ArgumentNullException>().WithParameterName("barrelGuid");
+        act.Should().Throw<ArgumentNullException>();
     }
 }

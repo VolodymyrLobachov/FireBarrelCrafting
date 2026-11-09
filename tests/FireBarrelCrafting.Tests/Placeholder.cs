@@ -2,10 +2,10 @@ using System.Runtime.CompilerServices;
 
 namespace FireBarrelCrafting.Tests;
 
-/// <summary>Creates dependency instances for tests that only need a non-null reference.</summary>
+/// <summary>Creates instances of mod types without running their constructors.</summary>
 /// <remarks>
 /// Most mod types depend on objects that only the running game / MelonLoader can construct.
-/// For constructor guard tests a non-null reference is all that matters, so the constructor is skipped.
+/// Tests that only exercise plain fields and properties can skip the constructor entirely.
 /// </remarks>
 internal static class Placeholder
 {

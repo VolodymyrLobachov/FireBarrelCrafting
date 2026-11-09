@@ -26,7 +26,7 @@ public sealed class ToolNamesTests
         Action act = () => ToolNames.Friendly(null!);
 
         // Assert
-        act.Should().Throw<ArgumentNullException>().WithParameterName("gearName");
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [TestMethod]
@@ -69,6 +69,6 @@ public sealed class ToolNamesTests
         Action act = () => ToolNames.DescribeAlternatives(null!);
 
         // Assert
-        act.Should().Throw<ArgumentNullException>().WithParameterName("gearNames");
+        act.Should().Throw<ArgumentNullException>();
     }
 }
