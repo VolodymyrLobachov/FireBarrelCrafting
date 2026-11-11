@@ -4,7 +4,7 @@ using Il2CppTLD.Placement;
 
 namespace FireBarrelCrafting.Patches;
 
-/// <summary>When the game re-creates one of our fire barrels from a save, give it back its identity.</summary>
+/// <summary>When the game re-creates one of our fires (fire barrel, rim grill) from a save, give it back its identity.</summary>
 [HarmonyPatch(typeof(Placeable), nameof(Placeable.FindOrCreateAndDeserialize))]
 internal static class PlaceableRestorePatch
 {
@@ -13,7 +13,7 @@ internal static class PlaceableRestorePatch
     /// <param name="__result">The placeable the game found or created.</param>
     private static void Postfix(string guid, Placeable __result)
     {
-        if (__result == null || !FireBarrelIdentity.IsModGuid(guid) || Mod.Services is not { } services)
+        if (__result == null || !FireIdentity.IsModGuid(guid) || Mod.Services is not { } services)
         {
             return;
         }
@@ -24,8 +24,8 @@ internal static class PlaceableRestorePatch
         }
         catch (Exception e)
         {
-            // Never break save loading: the barrel still exists, only its fire state may not line up.
-            services.Log.Error($"Restoring fire barrel {guid} failed", e);
+            // Never break save loading: the object still exists, only its fire state may not line up.
+            services.Log.Error($"Restoring '{__result.name}' {guid} failed", e);
         }
     }
 }

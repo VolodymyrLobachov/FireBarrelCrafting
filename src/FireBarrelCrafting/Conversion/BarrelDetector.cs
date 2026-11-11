@@ -17,7 +17,7 @@ internal sealed class BarrelDetector
     /// </summary>
     private const string BarrelNamePrefix = "OBJ_MetalBarrelA";
 
-    /// <summary>Checks whether a decoration is a decorative barrel this mod may turn into a fire barrel.</summary>
+    /// <summary>Checks whether a decoration is a decorative barrel this mod may turn into a fire barrel or rim grill.</summary>
     /// <param name="decoration">The decoration to check.</param>
     /// <returns>
     /// <see langword="true"/> for an active metal barrel with a <see cref="BreakDown"/> that is not already a fire / stove.

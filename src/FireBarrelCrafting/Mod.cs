@@ -31,8 +31,8 @@ public sealed class Mod : MelonMod
         var log = new ModLog(LoggerInstance, () => settings.VerboseLogging);
 
         var detector = new BarrelDetector();
-        var registry = new FireBarrelRegistry(log);
-        var factory = new FireBarrelFactory(registry, log);
+        var registry = new FireRegistry(log);
+        var factory = new FireFactory(registry, log);
         var tools = new CraftingTools(settings, log);
         var conversion = new BarrelConversionService(settings, detector, tools, factory, log);
         var wheel = new ConversionWheel(detector, conversion, log);
@@ -43,7 +43,7 @@ public sealed class Mod : MelonMod
 }
 
 /// <summary>What the Harmony patches need, and nothing more.</summary>
-/// <param name="Wheel">Adds the "Fire Barrel" entry to barrel interaction wheels.</param>
-/// <param name="Registry">Restores our fire barrels when a save is loaded.</param>
+/// <param name="Wheel">Adds the "Fire Barrel" and "Rim Grill" entries to barrel interaction wheels.</param>
+/// <param name="Registry">Restores our fire barrels and rim grills when a save is loaded.</param>
 /// <param name="Log">Mod logger.</param>
-internal sealed record ModServices(ConversionWheel Wheel, FireBarrelRegistry Registry, ModLog Log);
+internal sealed record ModServices(ConversionWheel Wheel, FireRegistry Registry, ModLog Log);

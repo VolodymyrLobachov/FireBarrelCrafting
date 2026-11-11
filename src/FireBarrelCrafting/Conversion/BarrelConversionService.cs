@@ -10,19 +10,19 @@ namespace FireBarrelCrafting.Conversion;
 
 /// <summary>
 /// Runs one conversion: checks requirements, shows the progress bar, then swaps the decorative barrel
-/// for a vanilla fire barrel (GRASP: Controller). The actual work is delegated to collaborators.
+/// for the chosen vanilla fire (GRASP: Controller). The actual work is delegated to collaborators.
 /// </summary>
 /// <param name="settings">Supplies the craft duration.</param>
 /// <param name="detector">Re-checks the barrel when the progress bar finishes.</param>
 /// <param name="tools">Finds and wears the tool.</param>
-/// <param name="factory">Creates the fire barrel.</param>
+/// <param name="factory">Creates the fire barrel or rim grill.</param>
 /// <param name="log">Mod logger.</param>
 /// <exception cref="ArgumentNullException">A parameter is <see langword="null"/>.</exception>
 internal sealed class BarrelConversionService(
     FireBarrelSettings settings,
     BarrelDetector detector,
     CraftingTools tools,
-    FireBarrelFactory factory,
+    FireFactory factory,
     ModLog log)
 {
     private const float ProgressBarSeconds = 5f;
@@ -30,7 +30,7 @@ internal sealed class BarrelConversionService(
     private readonly FireBarrelSettings _settings = settings ?? throw new ArgumentNullException(nameof(settings));
     private readonly BarrelDetector _detector = detector ?? throw new ArgumentNullException(nameof(detector));
     private readonly CraftingTools _tools = tools ?? throw new ArgumentNullException(nameof(tools));
-    private readonly FireBarrelFactory _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+    private readonly FireFactory _factory = factory ?? throw new ArgumentNullException(nameof(factory));
     private readonly ModLog _log = log ?? throw new ArgumentNullException(nameof(log));
 
     private PendingConversion? _pending;
@@ -40,31 +40,35 @@ internal sealed class BarrelConversionService(
     /// otherwise launches the progress bar. Ignored while another conversion is running.
     /// </summary>
     /// <param name="barrel">A barrel accepted by <see cref="BarrelDetector.IsConvertible"/>.</param>
-    public void Begin(DecorationItem barrel)
+    /// <param name="target">What to turn the barrel into.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="target"/> is <see langword="null"/>.</exception>
+    public void Begin(DecorationItem barrel, ConversionTarget target)
     {
+        ArgumentNullException.ThrowIfNull(target);
         if (_pending is not null || barrel == null)
         {
             return;
         }
 
-        if (!TryCheckRequirements(barrel, out GearItem? tool, out string? problem))
+        if (!TryCheckRequirements(barrel, target, out GearItem? tool, out string? problem))
         {
             HUDMessage.AddMessage(problem, false, false);
             return;
         }
 
-        _pending = new PendingConversion(barrel, tool);
-        _log.Debug($"Starting conversion of '{barrel.name}' with {tool.name}.");
+        _pending = new PendingConversion(barrel, target, tool);
+        _log.Debug($"Starting conversion of '{barrel.name}' into {target.Noun} with {tool.name}.");
 
         var onExit = DelegateSupport.ConvertDelegate<OnExitDelegate>(new Action<bool, bool, float>(OnProgressBarExit));
         InterfaceManager.GetPanel<Panel_GenericProgressBar>().Launch(
-            ModText.Progress, ProgressBarSeconds, _settings.CraftMinutes, randomFailureThreshold: 0f,
+            target.Progress, ProgressBarSeconds, _settings.CraftMinutes, randomFailureThreshold: 0f,
             audioName: BreakDownAudioOf(barrel), voiceName: null,
             supressHeavyBreathing: false, skipRestoreInHands: false, del: onExit);
     }
 
     private bool TryCheckRequirements(
         DecorationItem barrel,
+        ConversionTarget target,
         [NotNullWhen(true)] out GearItem? tool,
         [NotNullWhen(false)] out string? problem)
     {
@@ -80,14 +84,14 @@ internal sealed class BarrelConversionService(
         tool = _tools.FindBest();
         if (tool == null)
         {
-            problem = ModText.ToolRequired(_tools.RequirementText);
+            problem = target.ToolRequired(_tools.RequirementText);
             return false;
         }
 
-        if (!_factory.IsPrefabAvailable)
+        if (!_factory.IsPrefabAvailable(target.PrefabAddress))
         {
             tool = null;
-            problem = ModText.PrefabMissing;
+            problem = target.PrefabMissing;
             return false;
         }
 
@@ -113,9 +117,9 @@ internal sealed class BarrelConversionService(
                 return;
             }
 
-            Replace(pending.Barrel);
+            Replace(pending.Barrel, pending.Target);
             _tools.ApplyWear(pending.Tool);
-            HUDMessage.AddMessage(ModText.Success, false, false);
+            HUDMessage.AddMessage(pending.Target.Success, false, false);
         }
         catch (Exception e)
         {
@@ -124,21 +128,21 @@ internal sealed class BarrelConversionService(
         }
     }
 
-    private void Replace(DecorationItem decoration)
+    private void Replace(DecorationItem decoration, ConversionTarget target)
     {
         GameObject barrel = decoration.gameObject;
         string barrelName = barrel.name;
         Vector3 position = barrel.transform.position;
         // Keep it upright even if the decorative barrel was slightly tilted.
         Quaternion rotation = Quaternion.Euler(0f, barrel.transform.eulerAngles.y, 0f);
-        // The two prefabs have different pivots, so the new barrel is aligned by its bottom.
+        // The two prefabs have different pivots, so the new object is aligned by its bottom.
         float? floorHeight = GroundAligner.TryGetBottom(barrel, out float bottom) ? bottom : null;
 
-        // Remove the decorative barrel the vanilla way (the game saves it by guid). No yield: it became the fire barrel.
+        // Remove the decorative barrel the vanilla way (the game saves it by guid). No yield: it became the new object.
         barrel.GetComponent<BreakDown>().DoBreakDown(false);
 
-        string guid = _factory.Create(position, rotation, floorHeight);
-        _log.Info($"Converted '{barrelName}' into a fire barrel at {position} (guid {guid}).");
+        string guid = _factory.Create(target.PrefabAddress, position, rotation, floorHeight);
+        _log.Info($"Converted '{barrelName}' into {target.Noun} at {position} (guid {guid}).");
     }
 
     private static string? BreakDownAudioOf(DecorationItem barrel)
@@ -149,6 +153,7 @@ internal sealed class BarrelConversionService(
 
     /// <summary>The conversion waiting for the progress bar to finish.</summary>
     /// <param name="Barrel">Barrel being converted.</param>
+    /// <param name="Target">What it becomes.</param>
     /// <param name="Tool">Tool to wear when it succeeds.</param>
-    private sealed record PendingConversion(DecorationItem Barrel, GearItem Tool);
+    private sealed record PendingConversion(DecorationItem Barrel, ConversionTarget Target, GearItem Tool);
 }

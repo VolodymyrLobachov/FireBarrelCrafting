@@ -1,13 +1,16 @@
 # FireBarrelCrafting (The Long Dark / MelonLoader)
 
-Turn a decorative metal barrel (`OBJ_MetalBarrelA`) into a working vanilla fire barrel.
+Turn a decorative metal barrel (`OBJ_MetalBarrelA`) into a working vanilla fire barrel or rim grill.
 Plastic barrels can't be converted.
 
-![Interaction wheel on a decorative barrel: Destroy and Fire Barrel](docs/craft_menu.jpg)
+![A crafted rim grill and fire barrel, both burning](docs/grill_and_barrel.jpg)
 
 ## Usage
 * In your safehouse's edit mode, select a decorative metal barrel: next to the vanilla actions
-  (e.g. **Destroy**) there is a **Fire Barrel** action.
+  (e.g. **Destroy**) there are **Fire Barrel** and **Rim Grill** actions.
+
+  ![Action wheel on a decorative metal barrel: Destroy, Fire Barrel and Rim Grill](docs/craft_menu_v2.jpg)
+
 * Requires a **Hacksaw**, **Hatchet** or **Improvised Hatchet** in your inventory (the best-condition one is used
   and loses 10% condition). Takes 60 in-game minutes. Items stacked on the barrel must be removed first.
 
@@ -15,15 +18,21 @@ Plastic barrels can't be converted.
 * The Long Dark 2.60, MelonLoader 0.7.x
 * [ModSettings](https://github.com/DigitalzombieTLD/ModSettings)
 
-## Safe to uninstall
-Barrels you never converted are untouched. A converted barrel is the game's own `INTERACTIVE_FireBarrel`,
-saved by the game's placement system, so it stays after the mod is removed (only the fire's burn state may reset).
+## Uninstalling
+Barrels you never converted are untouched. A converted barrel is the game's own `INTERACTIVE_FireBarrel` or `INTERACTIVE_RimGrill`,
+saved by the game's placement system, so it stays in your save and keeps working after the mod is removed
+(only the fire's burn state may reset).
+
+**Rim grills can no longer be moved without this mod.** The vanilla rim grill prefab lets its rack and cooking slots
+take the click in edit mode, and the mod corrects that on every load. Fire barrels are not affected.
+* Place your rim grills where you want them before uninstalling.
+* To move one later, reinstall this mod or install Safehouse Customization Plus, which also lets you move it.
 
 ## How it works
 * The decorative barrel is removed through the game's own `BreakDown.DoBreakDown` (saved by the game).
-* The vanilla prefab `Assets/Prefabs/Interactive/INTERACTIVE_FireBarrel.prefab` is spawned via Addressables,
+* The vanilla prefab `Assets/Prefabs/Interactive/INTERACTIVE_FireBarrel.prefab` (or `INTERACTIVE_RimGrill.prefab`) is spawned via Addressables,
   aligned to the old barrel's bottom and registered with `PlaceableManager`, so the game saves and re-creates it.
-* Spawned barrels get guids starting with `fbc0ffee`; on load the mod restores their `ObjectGuid`s
+* Spawned objects get guids starting with `fbc0ffee`; on load the mod restores their `ObjectGuid`s
   so the fire's fuel/burn state persists.
 
 ## Settings
@@ -46,8 +55,8 @@ src/FireBarrelCrafting/
   Mod.cs              entry point + composition root
   Configuration/      ModSettings menu settings
   Conversion/         what a convertible barrel is, tools, the conversion workflow
-  Spawning/           fire barrel factory, save registration, guid scheme, ground alignment
-  Interaction/        the Fire Barrel wheel entry
+  Spawning/           fire factory (fire barrel, rim grill), save registration, guid scheme, ground alignment
+  Interaction/        the Fire Barrel / Rim Grill wheel entries
   Patches/            thin Harmony adapters into the game
   Infrastructure/     logging, player-facing text, compiler shim
 tests/FireBarrelCrafting.Tests/   MSTest + FluentAssertions: pure logic, settings (incl. ModSettings' own field validation), constructor guards

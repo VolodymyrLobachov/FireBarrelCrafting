@@ -15,34 +15,34 @@ internal sealed class FireBarrelSettings : JsonModSettings
     /// <summary>Whether a hacksaw can be used; read <see cref="AllowedTools"/> instead.</summary>
     [Section("Tools (any one is required)")]
     [Name("Hacksaw")]
-    [Description("Allow the hacksaw to make fire barrels.")]
+    [Description("Allow the hacksaw to make fire barrels and rim grills.")]
     public bool AllowHacksaw = true;
 
     /// <summary>Whether a hatchet can be used; read <see cref="AllowedTools"/> instead.</summary>
     [Name("Hatchet")]
-    [Description("Allow the hatchet to make fire barrels.")]
+    [Description("Allow the hatchet to make fire barrels and rim grills.")]
     public bool AllowHatchet = true;
 
     /// <summary>Whether an improvised hatchet can be used; read <see cref="AllowedTools"/> instead.</summary>
     [Name("Improvised Hatchet")]
-    [Description("Allow the improvised hatchet to make fire barrels.")]
+    [Description("Allow the improvised hatchet to make fire barrels and rim grills.")]
     public bool AllowImprovisedHatchet = true;
 
     /// <summary>Whether a prybar can be used; read <see cref="AllowedTools"/> instead.</summary>
     [Name("Prybar")]
-    [Description("Allow the prybar to make fire barrels.")]
+    [Description("Allow the prybar to make fire barrels and rim grills.")]
     public bool AllowPrybar;
 
     /// <summary>Raw tool wear; read <see cref="ToolConditionLossPercent"/> instead.</summary>
     [Section("Crafting")]
     [Name("Tool wear (%)")]
-    [Description("Condition the tool loses per fire barrel, in percent of its max condition. 0 = no wear.")]
+    [Description("Condition the tool loses per fire barrel or rim grill, in percent of its max condition. 0 = no wear.")]
     [Slider(0, 100)]
     public int ToolWearPercent = 10;
 
     /// <summary>Raw craft time; read <see cref="CraftMinutes"/> instead.</summary>
     [Name("Craft time (minutes)")]
-    [Description("In-game minutes it takes to make a fire barrel.")]
+    [Description("In-game minutes it takes to make a fire barrel or rim grill.")]
     [Slider(0, 240)]
     public int CraftTimeMinutes = 60;
 
