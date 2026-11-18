@@ -34,6 +34,15 @@ internal sealed class FireRegistry(ModLog log)
 
         AssignObjectGuids(fireObject, guid);
         PrioritizeDecorationInteraction(fireObject);
+        ClearStartingCharcoal(fireObject);
+
+        // A fresh fire has never burnt, so it starts with nothing to harvest. This state is saved by the game,
+        // so it is done only here, never on restore (that would wipe charcoal the player has since earned).
+        Fire fire = fireObject.GetComponentInChildren<Fire>(true);
+        if (fire != null)
+        {
+            fire.RemoveAllCharcoal();
+        }
     }
 
     /// <summary>Gives a fire the game re-created from a save back its identity and puts it on the floor.</summary>
@@ -43,6 +52,7 @@ internal sealed class FireRegistry(ModLog log)
     {
         AssignObjectGuids(fireObject, guid);
         PrioritizeDecorationInteraction(fireObject);
+        ClearStartingCharcoal(fireObject);
         // Fire barrels crafted by pre-release builds could have been saved floating.
         GroundAligner.SnapDown(fireObject);
         _log.Debug($"Restored '{fireObject.name}' {guid} at {fireObject.transform.position}.");
@@ -59,6 +69,20 @@ internal sealed class FireRegistry(ModLog log)
         if (decoration != null)
         {
             decoration.m_PrioritizeInteractionOverChildren = true;
+        }
+    }
+
+    /// <summary>
+    /// Vanilla fire prefabs come with charcoal already inside, as if found used in the world. A fire the player just
+    /// made has not burnt yet, so it must not. It is a prefab value, not saved by the game, hence it is re-applied
+    /// on every restore. Charcoal from actually burning fuel is unaffected.
+    /// </summary>
+    private static void ClearStartingCharcoal(GameObject fireObject)
+    {
+        Fire fire = fireObject.GetComponentInChildren<Fire>(true);
+        if (fire != null)
+        {
+            fire.m_NumStartingCharcoalPieces = 0;
         }
     }
 
