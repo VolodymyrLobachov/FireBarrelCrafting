@@ -32,13 +32,10 @@ internal sealed class FireRegistry(ModLog log)
             RegisterPlaceable(placeable, guid);
         }
 
-        AssignObjectGuids(fireObject, guid);
-        PrioritizeDecorationInteraction(fireObject);
-        ClearStartingCharcoal(fireObject);
+        Fire? fire = ApplyRuntimeFixUps(fireObject, guid);
 
         // A fresh fire has never burnt, so it starts with nothing to harvest. This state is saved by the game,
         // so it is done only here, never on restore (that would wipe charcoal the player has since earned).
-        Fire fire = fireObject.GetComponentInChildren<Fire>(true);
         if (fire != null)
         {
             fire.RemoveAllCharcoal();
@@ -50,12 +47,29 @@ internal sealed class FireRegistry(ModLog log)
     /// <param name="guid">The guid it was saved under.</param>
     public void Restore(GameObject fireObject, string guid)
     {
-        AssignObjectGuids(fireObject, guid);
-        PrioritizeDecorationInteraction(fireObject);
-        ClearStartingCharcoal(fireObject);
+        ApplyRuntimeFixUps(fireObject, guid);
         // Fire barrels crafted by pre-release builds could have been saved floating.
         GroundAligner.SnapDown(fireObject);
         _log.Debug($"Restored '{fireObject.name}' {guid} at {fireObject.transform.position}.");
+    }
+
+    /// <summary>Applies what the game does not save, on creation and on every restore.</summary>
+    /// <returns>The object's <see cref="Fire"/>, or <see langword="null"/> if the prefab has none.</returns>
+    private Fire? ApplyRuntimeFixUps(GameObject fireObject, string guid)
+    {
+        PrioritizeDecorationInteraction(fireObject);
+
+        ObjectGuid.MaybeAttachObjectGuidAddOrReplace(fireObject, guid);
+        Fire fire = fireObject.GetComponentInChildren<Fire>(true);
+        if (fire == null)
+        {
+            _log.Warning($"'{fireObject.name}' has no Fire component.");
+            return null;
+        }
+
+        ObjectGuid.MaybeAttachObjectGuidAddOrReplace(fire.gameObject, FireIdentity.FireGuidFor(guid));
+        ClearStartingCharcoal(fire);
+        return fire;
     }
 
     /// <summary>
@@ -77,14 +91,7 @@ internal sealed class FireRegistry(ModLog log)
     /// made has not burnt yet, so it must not. It is a prefab value, not saved by the game, hence it is re-applied
     /// on every restore. Charcoal from actually burning fuel is unaffected.
     /// </summary>
-    private static void ClearStartingCharcoal(GameObject fireObject)
-    {
-        Fire fire = fireObject.GetComponentInChildren<Fire>(true);
-        if (fire != null)
-        {
-            fire.m_NumStartingCharcoalPieces = 0;
-        }
-    }
+    private static void ClearStartingCharcoal(Fire fire) => fire.m_NumStartingCharcoalPieces = 0;
 
     private void RegisterPlaceable(Placeable placeable, string guid)
     {
@@ -92,13 +99,9 @@ internal sealed class FireRegistry(ModLog log)
         string previousGuid = placeable.m_Guid;
 
         // Awake may already have registered the instance under the prefab's guid; move it to ours.
-        if (!string.IsNullOrEmpty(previousGuid) && placeables.ContainsKey(previousGuid))
+        if (PlaceableRegistration.IsRegisteredUnderOwnGuid(placeable))
         {
-            Placeable registered = placeables[previousGuid].m_Handle;
-            if (registered != null && registered.Pointer == placeable.Pointer)
-            {
-                placeables.Remove(previousGuid);
-            }
+            placeables.Remove(previousGuid);
         }
 
         placeable.m_Guid = guid;
@@ -113,19 +116,5 @@ internal sealed class FireRegistry(ModLog log)
         }
 
         _log.Debug($"Placeable registered: '{previousGuid}' -> '{guid}'.");
-    }
-
-    private void AssignObjectGuids(GameObject fireObject, string guid)
-    {
-        ObjectGuid.MaybeAttachObjectGuidAddOrReplace(fireObject, guid);
-
-        Fire fire = fireObject.GetComponentInChildren<Fire>(true);
-        if (fire == null)
-        {
-            _log.Warning($"'{fireObject.name}' has no Fire component.");
-            return;
-        }
-
-        ObjectGuid.MaybeAttachObjectGuidAddOrReplace(fire.gameObject, FireIdentity.FireGuidFor(guid));
     }
 }

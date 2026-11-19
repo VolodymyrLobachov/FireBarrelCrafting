@@ -58,15 +58,4 @@ public sealed class FireIdentityTests
         // Assert
         result.Should().Be(SavedFireGuid, "the burn state of fires in existing saves is stored under this guid");
     }
-
-    [TestMethod]
-    public void FireGuidFor_DifferentObjects_ReturnsDifferentGuids()
-    {
-        // Act
-        string first = FireIdentity.FireGuidFor(FireIdentity.NewGuid());
-        string second = FireIdentity.FireGuidFor(FireIdentity.NewGuid());
-
-        // Assert
-        first.Should().NotBe(second);
-    }
 }

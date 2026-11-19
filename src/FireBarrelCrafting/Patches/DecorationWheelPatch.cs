@@ -4,7 +4,7 @@ using Il2Cpp;
 namespace FireBarrelCrafting.Patches;
 
 /// <summary>
-/// After a decoration builds its interaction wheel entries, add our entries for convertible barrels.
+/// After a decoration builds its interaction wheel entries, add our entries for convertible barrels and wheels.
 /// </summary>
 [HarmonyPatch(typeof(DecorationItem), nameof(DecorationItem.SetupInteraction))]
 internal static class DecorationWheelPatch
@@ -24,7 +24,7 @@ internal static class DecorationWheelPatch
         }
         catch (Exception e)
         {
-            // Never break the game's interaction: without our entries the barrel simply behaves as vanilla.
+            // Never break the game's interaction: without our entries the decoration simply behaves as vanilla.
             services.Log.Error("Adding the wheel entries failed", e);
         }
     }

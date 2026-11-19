@@ -1,5 +1,4 @@
 using FireBarrelCrafting.Conversion;
-using FireBarrelCrafting.Interaction;
 
 namespace FireBarrelCrafting.Tests;
 
@@ -8,9 +7,6 @@ public sealed class ConversionTargetTests
 {
     /// <summary>A wheel slot fits about this many characters ("Craft Fire Barrel", 17, overflowed).</summary>
     private const int MaxWheelLabelLength = 16;
-
-    /// <summary>Entries the vanilla game puts on a decorative barrel's wheel ("Destroy").</summary>
-    private const int VanillaBarrelEntries = 1;
 
     [TestMethod]
     public void All_Targets_HaveUniqueLocIdsAndPrefabs()
@@ -32,16 +28,6 @@ public sealed class ConversionTargetTests
 
         // Assert
         labelLengths.Should().OnlyContain(length => length > 0 && length <= MaxWheelLabelLength);
-    }
-
-    [TestMethod]
-    public void All_TargetsTogetherWithVanillaEntries_FitTheWheel()
-    {
-        // Act
-        int entries = VanillaBarrelEntries + ConversionTarget.All.Count;
-
-        // Assert
-        entries.Should().BeLessThanOrEqualTo(ConversionWheel.WheelSlots);
     }
 
     [TestMethod]

@@ -46,7 +46,12 @@ internal sealed class FireBarrelSettings : JsonModSettings
     [Slider(0, 240)]
     public int CraftTimeMinutes = 60;
 
-    /// <summary>Gets or sets a value indicating whether diagnostic messages are logged.</summary>
+    /// <summary>Whether metal barrels may also become rim grills.</summary>
+    [Name("Rim grill from barrels")]
+    [Description("Also allow making rim grills from decorative metal barrels. Wheels with a rim can always be made into one.")]
+    public bool RimGrillFromBarrels = true;
+
+    /// <summary>Whether diagnostic messages are logged.</summary>
     [Section("Diagnostics")]
     [Name("Verbose logging")]
     [Description("Write extra diagnostic lines to MelonLoader/Latest.log.")]

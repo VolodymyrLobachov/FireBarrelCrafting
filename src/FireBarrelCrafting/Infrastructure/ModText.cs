@@ -6,6 +6,6 @@ internal static class ModText
     /// <summary>Game sprite for the craft entries.</summary>
     public const string WheelIcon = "ico_crafting";
 
-    /// <summary>HUD message when decorations are stacked on the barrel.</summary>
-    public const string RemoveItemsFirst = "Remove the items placed on the barrel first.";
+    /// <summary>HUD message when decorations are stacked on the barrel or wheel.</summary>
+    public const string RemoveItemsFirst = "Remove the items placed on it first.";
 }
