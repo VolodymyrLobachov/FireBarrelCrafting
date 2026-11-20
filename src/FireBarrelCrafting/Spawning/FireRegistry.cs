@@ -11,10 +11,12 @@ namespace FireBarrelCrafting.Spawning;
 /// re-creates the object, <see cref="ObjectGuid"/>s let the game match its fire and breakdown state) and the
 /// runtime fix-ups the game does not save.
 /// </summary>
+/// <param name="savedFires">Saved fire states the game could not apply because our fires did not exist yet.</param>
 /// <param name="log">Mod logger.</param>
-/// <exception cref="ArgumentNullException"><paramref name="log"/> is <see langword="null"/>.</exception>
-internal sealed class FireRegistry(ModLog log)
+/// <exception cref="ArgumentNullException">A parameter is <see langword="null"/>.</exception>
+internal sealed class FireRegistry(SavedFireStates savedFires, ModLog log)
 {
+    private readonly SavedFireStates _savedFires = savedFires ?? throw new ArgumentNullException(nameof(savedFires));
     private readonly ModLog _log = log ?? throw new ArgumentNullException(nameof(log));
 
     /// <summary>Registers a freshly created fire so the game saves it.</summary>
@@ -42,12 +44,18 @@ internal sealed class FireRegistry(ModLog log)
         }
     }
 
-    /// <summary>Gives a fire the game re-created from a save back its identity and puts it on the floor.</summary>
+    /// <summary>Gives a fire the game re-created from a save back its identity and fire state, and puts it on the floor.</summary>
     /// <param name="fireObject">The re-created fire barrel or rim grill.</param>
     /// <param name="guid">The guid it was saved under.</param>
     public void Restore(GameObject fireObject, string guid)
     {
-        ApplyRuntimeFixUps(fireObject, guid);
+        Fire? fire = ApplyRuntimeFixUps(fireObject, guid);
+        if (fire != null && _savedFires.TryTake(FireIdentity.FireGuidFor(guid), out string? state))
+        {
+            // Before SnapDown: the state carries the fire's saved position, which must move with the object.
+            fire.Deserialize(state);
+        }
+
         // Fire barrels crafted by pre-release builds could have been saved floating.
         GroundAligner.SnapDown(fireObject);
         _log.Debug($"Restored '{fireObject.name}' {guid} at {fireObject.transform.position}.");
